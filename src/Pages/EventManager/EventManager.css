@@ -1,0 +1,89 @@
+/* EventManager.css */
+
+.event-manager-container {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.header {
+    background-color: #f5f5f5;
+    padding: 10px 0;
+    width: 100%;
+    text-align: center;
+}
+
+.logo {
+    max-width: 100px;
+}
+
+.main-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.nfc-logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.nfc-logo {
+    max-width: 150px;
+    opacity: 0.5; /* Initial transparency */
+    transition: opacity 0.3s ease-in-out;
+}
+
+.nfc-logo-enabled {
+    opacity: 1;
+}
+
+.nfc-logo-disabled {
+    opacity: 0.5;
+}
+
+.event-info {
+    background-color: #f5f5f5;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 20px;
+    width: 100%;
+    text-align: center;
+}
+
+.event-info h2 {
+    margin-top: 0;
+}
+
+.nfc-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.checked-in-list {
+    background-color: #f5f5f5;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 20px;
+    width: 100%;
+    text-align: center;
+}
+
+.checked-in-list h3 {
+    margin-top: 0;
+}
+
+.checked-in-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+.checked-in-list li {
+    margin: 5px 0;
+}

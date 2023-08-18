@@ -1,0 +1,46 @@
+.header {
+    display: flex;
+    align-items: center; /* Vertically align items in the center */
+    justify-content: space-between; /* Distribute items evenly along the main axis */
+    padding: 10px; /* Add padding for spacing */
+    border-bottom: 1px solid #ddd; /* Add a bottom border for separation */
+}
+/* AddEventButton.css */
+.add-event-button {
+    background-color: #DAA520;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    position: absolute;
+    top:4%
+}
+/* LogoImage.css */
+.logo-image {
+    display: block;
+    width: 100px; /* Adjust as needed */
+    height: 100px; /* Adjust as needed */
+    margin-left: auto;
+}
+
+/* EventsSection.css */
+.events-section {
+    margin-top: 20px;
+    border-bottom: 2px solid #333; /* Add an underline */
+    padding-bottom: 20px;
+}
+
+/* EventsTitle.css */
+.events-title {
+    margin-bottom: 10px; /* Add spacing below the title */
+    text-decoration-line: underline;
+}
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}

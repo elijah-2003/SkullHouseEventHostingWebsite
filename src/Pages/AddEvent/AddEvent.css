@@ -1,0 +1,38 @@
+/* AddEvent.css */
+.add-event-form {
+    display: grid;
+    gap: 1rem;
+}
+
+.add-event-form label {
+    font-weight: bold;
+    display: block;
+}
+
+.add-event-form input,
+.add-event-form textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.add-event-form button {
+    background-color: #DAA520;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.form-group textarea {
+    resize: vertical; /* Allow vertical resizing */
+    min-height: 100px; /* Set a minimum height */
+}
+body {
+    /* ... (other styles) */
+    font-family: sans-serif; /* Replace with the font you want */
+}
+h2{
+    text-decoration-line: underline;
+}

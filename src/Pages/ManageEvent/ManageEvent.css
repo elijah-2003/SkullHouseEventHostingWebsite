@@ -1,0 +1,18 @@
+/* ManageEvent.css */
+.manage-event-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px; /* Add some spacing between buttons and content */
+}
+
+/* Style the buttons as needed */
+.manage-event-buttons {
+    display: flex;
+    gap: 10px; /* Add some spacing between buttons */
+}
+
+/* Other styles for your content */
+.event-parameters {
+    /* Add styles for displaying event parameters */
+}
