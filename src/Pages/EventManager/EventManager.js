@@ -19,11 +19,6 @@ function EventManager() {
 
     useEffect(() => {
         // Check if the event has started
-        const event = {
-            date: '2023-08-20',
-            time: '14:00'
-        };
-
         if (!hasEventStarted(event)) {
             alert('The event has not yet started.');
             navigate(-1) // Go back to the previous page

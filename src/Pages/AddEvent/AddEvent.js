@@ -3,11 +3,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import isEventExpired from '../../Utilities/expired'
 import './AddEvent.css'; // Import your AddEvent.css for styling
+import {addEvent, getEvents} from "../../Api/api-service";
 
 function AddEvent(props) {
-    const { addEvent, updateEvent, events } = useEventContext();
     const { eventId } = useParams();
-    const event = events.find(event => event.id === eventId);
+    const event = getEvents().find(event => event.id === eventId);
     const navigate = useNavigate();
     const [eventName, setEventName] = useState('');
     const [eventDescription, setEventDescription] = useState('');
@@ -57,13 +57,7 @@ function AddEvent(props) {
             return; // Abort the submission
         };
 
-        if (event) {
-            // Update the event using the updateEvent function
-            updateEvent(event.id, newEvent);
-        } else {
-            // Add a new event using the addEvent function
-            addEvent(newEvent);
-        }
+       addEvent(newEvent)
 
         setEventName('');
         setEventDescription('');
