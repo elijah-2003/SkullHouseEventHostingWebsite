@@ -1,34 +1,32 @@
 import React, {useState} from 'react';
 import { useParams } from 'react-router-dom';
-import { useEventContext } from '../../EventContext';
 import { useNavigate } from 'react-router-dom';
 //import './ManageEvent.css'
 import logo from '../../Images/Phi_Kappa_Sigma_coat_of_arms.png'
 import Footer from "../../Components/Footer";
+import {getEvents, deleteEvent} from "../../Api/api-service";
 function ManageEvent() {
     const { eventId } = useParams();
-    const { events } = useEventContext();
     const navigate  = useNavigate()
-    const event = events.find(event => event.id === eventId);
+    const event = getEvents().find(event => event.id === eventId);
 
     const deleteEvent = () => {
         const result = window.confirm('Are you sure you want to delete this event?');
         if (result)
         {
-            events.splice(events.indexOf(event), 1);
-            navigate('/');
+            deleteEvent(event.id);
         }
 
     }
     const editInformation = () => {
-        navigate(`/add-event/${event.id}`, { event });
+        navigate(`/add-event/${event.id}`);
     }
 
     const editPeople = () => {
-        navigate(`/edit-people/${event.id}`, { event });
+        navigate(`/edit-people/${event.id}`);
     }
     const manage_event = () => {
-        navigate(`/event-manager/${event.id}`, { event });
+        navigate(`/event-manager/${event.id}`);
     }
 
     if (!event) {

@@ -3,15 +3,14 @@ import logo from '../../Images/Phi_Kappa_Sigma_coat_of_arms.png'; // Replace wit
 import nfcLogo from '../../Images/nfc.png'; // Replace with your NFC logo path
 import './EventManager.css';
 import {useParams, useNavigate} from "react-router-dom";
-import {useEventContext} from "../../EventContext"; // Import your CSS file for styling
 import Footer from "../../Components/Footer";
 import hasEventStarted from "../../Utilities/hasEventStarted";
+import {getEvents} from "../../Api/api-service";
 
 function EventManager() {
     const { eventId } = useParams();
-    const { events } = useEventContext();
     const navigate = useNavigate()
-    const event = events.find(event => event.id === eventId);
+    const event = getEvents().find(event => event.id === eventId);
     const [currentAttendees, setCurrentAttendees] = useState(0);
     const [maxCapacity, setMaxCapacity] = useState(100);
     const [isInviteOnly, setIsInviteOnly] = useState(false);

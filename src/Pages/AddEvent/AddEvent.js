@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useEventContext } from '../../EventContext';
 import { v4 as uuidv4 } from 'uuid';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import isEventExpired from '../../Utilities/expired'
@@ -19,7 +18,7 @@ function AddEvent(props) {
     const [eventTime, setEventTime] = useState('');
     const [eventDuration, setEventDuration] = useState(''); // Selected duration
     const eventDurationOptions = ['1', '2', '3', '4', '5'];
-    let duration = ''
+    let duration = '';
 
     useEffect(() => {
         console.log(event)

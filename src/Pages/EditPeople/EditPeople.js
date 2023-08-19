@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useEventContext } from '../../EventContext';
 import { useNavigate } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 import './EditPeople.css';
 import logo from '../../Images/Phi_Kappa_Sigma_coat_of_arms.png';
 import Footer from "../../Components/Footer";
-
+import {addToBlackList, addToInvited, getEvents, deleteFromInvited, deleteFromBlackList} from "../../Api/api-service";
 
 function EditPeople() {
     const [selectedAction, setSelectedAction] = useState('invite');
     const { eventId } = useParams();
-    const { events, addToInviteList, deleteFromInviteList, addToBlackList, deleteFromBlackList } = useEventContext();
     const navigate  = useNavigate()
-    const event = events.find(event => event.id === eventId);
+    const event = getEvents().find(event => event.id === eventId);
 
     const handleActionChange = (e) => {
         setSelectedAction(e.target.value);
@@ -23,7 +22,7 @@ function EditPeople() {
         const lastName = prompt('Enter Last Name:');
         const school = prompt('Enter School:');
 
-        addToInviteList(eventId, createPerson(firstName, lastName, school));
+        addToInvited(eventId, createPerson(firstName, lastName, school));
     };
 
     const handleBlacklist = () => {
@@ -35,7 +34,11 @@ function EditPeople() {
     };
 
     const handleDeleteInvited = (index) => {
-        alert("I love puppies and rainbows")
+        deleteFromInvited(eventId, event.invited[index].id)
+    }
+
+    const handleDeleteBlackList = (index) => {
+        deleteFromBlackList(eventId, event.invited[index].id)
     }
 
     const createPerson = (first, last, school) =>
@@ -44,7 +47,8 @@ function EditPeople() {
             firstName: first,
             lastName: last,
             school: school,
-            image:""
+            image:"",
+            id: uuidv4()
         }
     }
 
@@ -90,7 +94,7 @@ function EditPeople() {
                             event.blacklist.map((person, index) => (
                                 <li key={index}>
                                     {person.firstName} {person.lastName} - {person.school}
-                                    <button onClick={() => handleDeleteInvited(index)}>Delete</button>
+                                    <button onClick={() => handleDeleteBlackList(index)}>Delete</button>
                                 </li>
                             ))
                         )}
