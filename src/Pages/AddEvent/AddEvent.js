@@ -3,11 +3,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import isEventExpired from '../../Utilities/expired'
 import './AddEvent.css'; // Import your AddEvent.css for styling
-import {addEvent, getEvents} from "../../Api/api-service";
+import {addEvent, getEvent} from "../../Api/api-service";
+import Loading from "../../Components/Loading";
+import ItemNotFound from "../../Components/ItemNotFound";
 
 function AddEvent(props) {
     const { eventId } = useParams();
-    const event = getEvents().find(event => event.id === eventId);
+    const [event, setEvent] = useState("")
     const navigate = useNavigate();
     const [eventName, setEventName] = useState('');
     const [eventDescription, setEventDescription] = useState('');
@@ -16,25 +18,36 @@ function AddEvent(props) {
     const [specialDetails, setSpecialDetails] = useState('');
     const [eventDate, setEventDate] = useState('');
     const [eventTime, setEventTime] = useState('');
+    const [loading, setLoading] = useState(true)
     const [eventDuration, setEventDuration] = useState(''); // Selected duration
-    const eventDurationOptions = ['1', '2', '3', '4', '5'];
-    let duration = '';
 
     useEffect(() => {
-        console.log(event)
-        if (event !== undefined) {
-            setEventName(event.name);
-            setEventDescription(event.description);
-            setEventLocation(event.location);
-            setEmergencyContact(event.emergency);
-            setSpecialDetails(event.special);
-            setEventDate(event.date || ''); // Set date if available, otherwise empty string
-            setEventTime(event.time || '');
-            setEventDuration(event.duration || '')
-        }
-    }, [event]);
+        async function fetchData() {
+            try {
+                if (eventId) {
+                    const eventData = await getEvent(eventId);
+                    setEvent(eventData)
+                    console.log("eventData:",eventData )
+                    if (eventData) {
+                        setEventName(eventData.name);
+                        setEventDescription(eventData.description);
+                        setEventLocation(eventData.location);
+                        setEmergencyContact(eventData.emergency);
+                        setSpecialDetails(eventData.special);
+                        setEventDate(eventData.date || ''); // Set date if available, otherwise empty string
+                        setEventTime(eventData.time || '');
+                        setEventDuration(eventData.duration || '')
+                    }
+                }
+                setLoading(false);
+                } catch (error) {
+                    throw error;
+                }
+            }
+            fetchData();
+        }, []);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         let newEvent = {
             name: eventName,
@@ -44,7 +57,6 @@ function AddEvent(props) {
             emergency: emergencyContact,
             special: specialDetails,
             invited: event ? event.invited : [],
-            blacklist: event ? event.blacklist : [],
             date: eventDate,
             time: eventTime,
             duration: eventDuration,
@@ -55,9 +67,13 @@ function AddEvent(props) {
         {
             alert("The event has expired and cannot be submitted.");
             return; // Abort the submission
-        };
+        }
 
-       addEvent(newEvent)
+        setLoading(true)
+
+       await addEvent(newEvent)
+
+        setLoading(false)
 
         setEventName('');
         setEventDescription('');
@@ -66,11 +82,13 @@ function AddEvent(props) {
         setSpecialDetails('');
         setEventDate('');
         setEventTime('');
-        duration = ''
+        setEventDuration(0)
         //Exit the Add Event page
         navigate('/')
 
     };
+    if (loading)
+        return <Loading/>
 
     return (
         <div className="add-event-container">
@@ -82,6 +100,7 @@ function AddEvent(props) {
                         type="text"
                         id="eventName"
                         value={eventName}
+                        placeholder="Phi Kap Event"
                         onChange={(e) => setEventName(e.target.value)}
                         required
                     />
@@ -91,6 +110,7 @@ function AddEvent(props) {
                     <textarea
                         id="eventDescription"
                         value={eventDescription}
+                        placeholder="What is this event for?"
                         onChange={(e) => setEventDescription(e.target.value)}
                         required
                     />
@@ -101,6 +121,7 @@ function AddEvent(props) {
                         type="text"
                         id="eventLocation"
                         value={eventLocation}
+                        placeholder="Skullhouse"
                         onChange={(e) => setEventLocation(e.target.value)}
                         required
                     />
@@ -111,6 +132,7 @@ function AddEvent(props) {
                         type="tel"
                         id="emergencyContact"
                         value={emergencyContact}
+                        placeholder="(123)-456-7890"
                         onChange={(e) => setEmergencyContact(e.target.value)}
                         required
                     />
@@ -120,6 +142,7 @@ function AddEvent(props) {
                     <textarea
                         id="specialDetails"
                         value={specialDetails}
+                        placeholder="Any extra details that guests should know?"
                         onChange={(e) => setSpecialDetails(e.target.value)}
                     />
                 </div>
@@ -145,19 +168,14 @@ function AddEvent(props) {
                 </div>
                 <div className="form-group">
                     <label htmlFor="eventDuration">Event Duration (hours):</label>
-                    <select
+                    <input
+                        type="number"
                         id="eventDuration"
                         value={eventDuration}
                         onChange={(e) => setEventDuration(e.target.value)}
+                        placeholder="Enter duration in hours"
                         required
-                    >
-                        <option value="">Select Duration</option>
-                        {eventDurationOptions.map((option) => (
-                            <option key={option} value={option}>
-                                {option}
-                            </option>
-                        ))}
-                    </select>
+                    />
                 </div>
                 <button type="submit">{event ? 'Update Event' : 'Add Event'}</button>
             </form>

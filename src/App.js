@@ -5,6 +5,8 @@ import AddEvent from './Pages/AddEvent/AddEvent';
 import ManageEvents from './Pages/ManageEvent/ManageEvent'
 import EditPeople from "./Pages/EditPeople/EditPeople";
 import EventManager from "./Pages/EventManager/EventManager";
+import InformationEntry from "./Pages/InformationEntry/InformationEntry";
+import Summary from "./Pages/Summary/Summary";
 
 function App() {
   return (
@@ -16,9 +18,13 @@ function App() {
               </Route>
               <Route path="/event-manager/:eventId" element={<EventManager />}>
               </Route>
+              <Route path="/information-entry/:eventId" element={<InformationEntry />}>
+              </Route>
               <Route path="/edit-people/:eventId" element={<EditPeople />}>
               </Route>
             <Route path="/manage-event/:eventId" element={<ManageEvents />}>
+            </Route>
+            <Route path="/summary/:eventId" element={<Summary/>}>
             </Route>
             <Route path="/" element={<Home />}>
             </Route>
