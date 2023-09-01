@@ -1,22 +1,28 @@
 import React, {useEffect, useState} from 'react';
 import Logo from '../../Images/Phi_Kappa_Sigma_coat_of_arms.png';
 import './Summary.css';
-import {useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import {getEvent} from "../../Api/api-service";
 import Loading from "../../Components/Loading";
 import ItemNotFound from "../../Components/ItemNotFound";
+import {addToBlackList, getBlacklist} from "../../Api/api-service";
+import hasEventStarted from "../../Utilities/hasEventStarted";
+import isEventExpired from "../../Utilities/expired";
 
 const Summary = () => {
+    const navigate = useNavigate()
     const { eventId } = useParams();
     const [expandedPerson, setExpandedPerson] = useState(null);
     const [loading, setLoading] = useState(true);
     const [event, setEvent] = useState(null);
 
     useEffect(() => {
+        let globalEvent;
         async function fetchData() {
             try {
                 let eventData = await getEvent(eventId);
                 setEvent(eventData);
+                globalEvent = eventData
                 setLoading(false)
             } catch (error) {
                 throw error;
@@ -32,6 +38,22 @@ const Summary = () => {
             setExpandedPerson(personId);
         }
     };
+
+    const handleAddToBlacklist = async (person) => {
+        setLoading(true)
+        const blacklist = await getBlacklist()
+        if (blacklist.find((p) => p.id === person.id))
+        {
+            alert("This person has already been added to the blacklist")
+            window.location.href = window.location.href;
+        }
+        else
+        {
+            await addToBlackList(eventId, person)
+            alert(`${person.firstName} ${person.lastName} has been added to the blacklist.`)
+            window.location.href = window.location.href;
+        }
+    }
 
     if (loading)
         return <Loading/>
@@ -64,6 +86,7 @@ const Summary = () => {
                                             width={"250px"}
                                             src={person.image}
                                         /></p>
+                                        <button onClick={() => handleAddToBlacklist(person)}>Add to Blacklist</button>
                                         {/* Add more person details as needed */}
                                     </div>
                                 )}

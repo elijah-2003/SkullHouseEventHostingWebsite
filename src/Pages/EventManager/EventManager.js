@@ -7,9 +7,12 @@ import { getEvent, addToCheckedIn } from '../../Api/api-service';
 import Loading from '../../Components/Loading';
 import ItemNotFound from '../../Components/ItemNotFound';
 import WebSocketError from "../../Components/WebsocketError";
+import {useNavigate} from "react-router-dom";
+import isEventExpired from "../../Utilities/expired";
 
 
 function EventManager() {
+    const navigate = useNavigate();
     const { eventId } = useParams();
     const [loading, setLoading] = useState(true);
     const [event, setEvent] = useState('');
@@ -23,9 +26,11 @@ function EventManager() {
     useEffect(() => {
         let globalId = ""
         let globalSocket = null
+        let globalEvent = {}
         async function fetchData() {
             try {
                 let eventData = await getEvent(eventId);
+                globalEvent = eventData
                 setEvent(eventData);
                 setCheckedInPeople(eventData.checkedIn)
                 setCurrentAttendees(eventData.checkedIn.length)
@@ -129,6 +134,14 @@ function EventManager() {
         };
 
         window.addEventListener('keydown', handleKeyDown);
+        const checkEventStatus = setInterval(() => {
+            if (isEventExpired(globalEvent)) {
+                alert("You cannot manage an expired event")
+                clearInterval(checkEventStatus); // Stop checking once expired
+                globalSocket.close();
+                navigate(`/manage-event/${eventId}`); // Navigate to manageEvent page
+            }
+        }, 3000);
         return () => {
             if (socket) {
                 socket.close();

@@ -6,6 +6,7 @@ import './AddEvent.css'; // Import your AddEvent.css for styling
 import {addEvent, getEvent} from "../../Api/api-service";
 import Loading from "../../Components/Loading";
 import ItemNotFound from "../../Components/ItemNotFound";
+import hasEventStarted from "../../Utilities/hasEventStarted";
 
 function AddEvent(props) {
     const { eventId } = useParams();
@@ -63,9 +64,9 @@ function AddEvent(props) {
             checkedIn: event ? event.checkedIn : [],
             id: event ? eventId : uuidv4(),
         };
-        if (isEventExpired(newEvent))
+        if (isEventExpired(newEvent) || hasEventStarted(newEvent))
         {
-            alert("The event has expired and cannot be submitted.");
+            alert(`The event ${isEventExpired(newEvent) ? 'has expired' : 'is ongoing'} and cannot be submitted.`);
             return; // Abort the submission
         }
 

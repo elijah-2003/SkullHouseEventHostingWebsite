@@ -11,7 +11,7 @@
 
 .add-event-form input,
 .add-event-form textarea {
-    width: 100%;
+    width: 90%;
     padding: 0.5rem;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -30,8 +30,7 @@
     min-height: 100px; /* Set a minimum height */
 }
 body {
-    /* ... (other styles) */
-    font-family: sans-serif; /* Replace with the font you want */
+    font-family: sans-serif;
 }
 h2{
     text-decoration-line: underline;

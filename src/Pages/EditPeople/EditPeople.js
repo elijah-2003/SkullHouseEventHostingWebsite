@@ -10,8 +10,11 @@ import Loading from "../../Components/Loading";
 import ItemNotFound from "../../Components/ItemNotFound";
 import qrcode from "qrcode";
 import { PDFViewer, Page, Text, View, Document, Image, Font } from "@react-pdf/renderer";
+import isEventExpired from "../../Utilities/expired";
+import hasEventStarted from "../../Utilities/hasEventStarted";
 
 function EditPeople() {
+    const navigate = useNavigate();
     const [selectedAction, setSelectedAction] = useState('invite');
     const [loading, setLoading] = useState(true)
     const [event, setEvent] = useState("")
@@ -28,11 +31,13 @@ function EditPeople() {
     const [selectedFile, setSelectedFile] = useState(null)
 
     useEffect(() => {
+        let globalEvent;
         async function fetchData() {
             try {
                 let eventData = await getEvent(eventId);
                 let blacklist = await getBlacklist()
                 setEvent(eventData);
+                globalEvent = eventData
                 setBlacklist(blacklist)
                 setLoading(false)
             } catch (error) {
@@ -41,6 +46,14 @@ function EditPeople() {
         }
 
         fetchData();
+
+        const checkEventStatus = setInterval(() => {
+            if (hasEventStarted(globalEvent)) {
+                alert(`You can no longer edit an ${isEventExpired(globalEvent) ? 'expired' : 'ongoing'} event.`)
+                clearInterval(checkEventStatus); // Stop checking once expired
+                navigate(`/manage-event/${eventId}`); // Navigate to manageEvent page
+            }
+        }, 3000);
     }, []);
 
     const styles = {

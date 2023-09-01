@@ -4,10 +4,12 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Logo from '../../Images/Phi_Kappa_Sigma_coat_of_arms.png';
 import Loading from "../../Components/Loading";
-import {getWebsockets } from "../../Api/api-service";
+import {getEvent, getWebsockets} from "../../Api/api-service";
 import ItemNotFound from "../../Components/ItemNotFound";
 import WelcomeMessage from "../../Components/WelcomeMessage";
 import {v4 as uuidv4} from "uuid";
+import isEventExpired from "../../Utilities/expired";
+import hasEventStarted from "../../Utilities/hasEventStarted";
 
 const InformationEntry = () => {
     const { eventId } = useParams();
@@ -21,19 +23,21 @@ const InformationEntry = () => {
     const [showHostSelector, setShowHostSelector] = useState(true);
     const [websockets, setWebsockets] = useState([]);
     const [selectedHostId, setSelectedHostId] = useState('');
-    const [event, setEvent] = useState("");
     const [showWelcomeMessage, setShowWelcomeMessage] = useState(false);
     const [websocketOff, setWebsocketOff] = useState(false)
 
     const navigate = useNavigate();
 
     useEffect(() => {
+        let globalEvent;
+        let globalSocket;
         async function start()
         {
             let websockets = await getWebsockets()
+            globalEvent = await getEvent(eventId)
             setWebsockets(websockets)
             const newSocket = new WebSocket(websocketURL);
-
+            globalSocket = newSocket
             newSocket.onopen = () => {
                 console.log('WebSocket connection opened');
             };
@@ -52,6 +56,14 @@ const InformationEntry = () => {
             setLoading(false);
         }
         start();
+        const checkEventStatus = setInterval(() => {
+            if (isEventExpired(globalEvent) || !hasEventStarted(globalEvent)) {
+                alert(`You cannot be host for an ${isEventExpired(globalEvent) ? 'expired' : 'unstarted '} event`)
+                clearInterval(checkEventStatus); // Stop checking once expired
+                globalSocket.close();
+                navigate(`/manage-event/${eventId}`); // Navigate to manageEvent page
+            }
+        }, 3000);
         return () => {
             if (socket) {
                 socket.close();
