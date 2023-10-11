@@ -10,6 +10,7 @@ import WelcomeMessage from "../../Components/WelcomeMessage";
 import {v4 as uuidv4} from "uuid";
 import isEventExpired from "../../Utilities/expired";
 import hasEventStarted from "../../Utilities/hasEventStarted";
+import WebSocketError from '../../Components/WebsocketError';
 
 const InformationEntry = () => {
     const { eventId } = useParams();
@@ -25,6 +26,7 @@ const InformationEntry = () => {
     const [selectedHostId, setSelectedHostId] = useState('');
     const [showWelcomeMessage, setShowWelcomeMessage] = useState(false);
     const [websocketOff, setWebsocketOff] = useState(false)
+    const [event, setEvent] = useState(false)
 
     const navigate = useNavigate();
 
@@ -36,6 +38,7 @@ const InformationEntry = () => {
             let websockets = await getWebsockets()
             globalEvent = await getEvent(eventId)
             setWebsockets(websockets)
+            setEvent(globalEvent)
             const newSocket = new WebSocket(websocketURL);
             globalSocket = newSocket
             newSocket.onopen = () => {
@@ -77,6 +80,14 @@ const InformationEntry = () => {
             alert('Please select a host before submitting.');
             return;
         }
+        let websockets = await getWebsockets()
+        let isHostActive = websockets.find((w) => w === selectedHostId)
+        if (!isHostActive)
+        {
+            setWebsocketOff(true)
+            return;
+        }
+        
         console.log("socket:", socket)
         const newPerson = {
             firstName: firstName,
@@ -121,16 +132,18 @@ const InformationEntry = () => {
         socket.send(eventString);
     }
 
+    if (websocketOff)
+        return <WebSocketError/>
     if (loading)
         return <Loading/>
-    if (!websockets)
+    if (!websockets || !event)
         return <ItemNotFound/>
     if (showWelcomeMessage)
         return <WelcomeMessage/>
 
     return (
         <div className="information-entry-container">
-            <img src={Logo} alt="Your Logo" className="logo" />
+            <button onClick={(e) => navigate(`/`)}><img src={Logo} alt="pks logo" className="logo" /></button>
             <h1>Enter Your Information</h1>
             {showHostSelector && (
                 <div className="overlay">
@@ -151,50 +164,53 @@ const InformationEntry = () => {
             )}
 
             {!showHostSelector && (
-                <form onSubmit={handleSubmit} className="entry-form">
-                    <TextField
-                        label="First Name"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        variant="outlined"
-                        fullWidth
-                        required
-                        margin="normal"
-                        disabled={!selectedHostId}
-                    />
-                    <TextField
-                        label="Last Name"
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                        variant="outlined"
-                        fullWidth
-                        required
-                        margin="normal"
-                        disabled={!selectedHostId}
-                    />
-                    <TextField
-                        label="School"
-                        value={school}
-                        onChange={(e) => setSchool(e.target.value)}
-                        variant="outlined"
-                        fullWidth
-                        required
-                        margin="normal"
-                        disabled={!selectedHostId}
-                    />
-                    <TextField
-                        label="Phone Number"
-                        value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value)}
-                        variant="outlined"
-                        fullWidth
-                        margin="normal"
-                        disabled={!selectedHostId}
-                    />
-                    <Button type="submit" variant="contained" color="primary">
-                        Submit
-                    </Button>
-                </form>
+                <>
+                    <h2>Host ID: {selectedHostId}</h2>
+                    <form onSubmit={handleSubmit} className="entry-form">
+                        <TextField
+                            label="First Name"
+                            value={firstName}
+                            onChange={(e) => setFirstName(e.target.value)}
+                            variant="outlined"
+                            fullWidth
+                            required
+                            margin="normal"
+                            disabled={!selectedHostId}
+                        />
+                        <TextField
+                            label="Last Name"
+                            value={lastName}
+                            onChange={(e) => setLastName(e.target.value)}
+                            variant="outlined"
+                            fullWidth
+                            required
+                            margin="normal"
+                            disabled={!selectedHostId}
+                        />
+                        <TextField
+                            label="School"
+                            value={school}
+                            onChange={(e) => setSchool(e.target.value)}
+                            variant="outlined"
+                            fullWidth
+                            required
+                            margin="normal"
+                            disabled={!selectedHostId}
+                        />
+                        <TextField
+                            label="Phone Number"
+                            value={phoneNumber}
+                            onChange={(e) => setPhoneNumber(e.target.value)}
+                            variant="outlined"
+                            fullWidth
+                            margin="normal"
+                            disabled={!selectedHostId}
+                        />
+                        <Button type="submit" variant="contained" color="primary">
+                            Submit
+                        </Button>
+                    </form>
+                </>
             )}
         </div>
     );

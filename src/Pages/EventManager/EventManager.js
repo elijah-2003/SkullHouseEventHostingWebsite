@@ -3,7 +3,7 @@ import logo from '../../Images/Phi_Kappa_Sigma_coat_of_arms.png';
 import qr from '../../Images/qr.png';
 import './EventManager.css';
 import { useParams } from 'react-router-dom';
-import { getEvent, addToCheckedIn } from '../../Api/api-service';
+import { getEvent, addToCheckedIn, getBlacklist } from '../../Api/api-service';
 import Loading from '../../Components/Loading';
 import ItemNotFound from '../../Components/ItemNotFound';
 import WebSocketError from "../../Components/WebsocketError";
@@ -15,25 +15,32 @@ function EventManager() {
     const navigate = useNavigate();
     const { eventId } = useParams();
     const [loading, setLoading] = useState(true);
-    const [event, setEvent] = useState('');
+    const [event, setEvent] = useState(null);
     const [currentAttendees, setCurrentAttendees] = useState(0);
     const [isQREnabled, setIsQREnabled] = useState(true);
     const [checkedInPeople, setCheckedInPeople] = useState([]);
     const [socket, setSocket] = useState(null); // State for the WebSocket instance
     const [webSocketId, setWebSocketId] = useState(''); // State for the WebSocket ID
     const [websocketOff, setWebsocketOff] = useState(false)
+    const [showBlacklist, setShowBlacklist] = useState(false);
+    const [blacklist, setBlacklist] = useState([])
+    const [warningOverlay, setWarningOverlay] = useState(false)
+    const [personOfInterest, setPersonOfInterest] = useState(null)
+    const [hostId, setHostId] = useState("")
+
 
     useEffect(() => {
-        let globalId = ""
         let globalSocket = null
-        let globalEvent = {}
+        let globalEvent = null
         async function fetchData() {
             try {
                 let eventData = await getEvent(eventId);
+                let blacklist = await getBlacklist()
                 globalEvent = eventData
                 setEvent(eventData);
-                setCheckedInPeople(eventData.checkedIn)
-                setCurrentAttendees(eventData.checkedIn.length)
+                setCheckedInPeople(eventData?.checkedIn)
+                setCurrentAttendees(eventData?.checkedIn.length)
+                setBlacklist(blacklist)
                 return eventData
             } catch (error) {
                 throw error;
@@ -63,7 +70,7 @@ function EventManager() {
                 switch (data.action) {
                     case "sendWebsocketId":
                         setWebSocketId(data.id);
-                        globalId = data.id
+                        setHostId(data.id)
                         setLoading(false)
                         break;
 
@@ -79,14 +86,8 @@ function EventManager() {
 
                         if (data.matches.length > 0) {
                             console.log("This person is blacklisted!")
-                            const confirmed = window.confirm(`${data.person.firstName} ${data.person.lastName} may be blacklisted. Do you still wish to check them in?`);
-                            if (confirmed) {
-                                (async () => {
-                                    await addToCheckedIn(eventId, data.person);
-                                    console.log("Checked in?")
-                                    newSocket.send(eventString);
-                                })();
-                            }
+                            setWarningOverlay(true)
+                            setPersonOfInterest(data.person)
                         } else {
                             (async () => {
                                 await addToCheckedIn(eventId, data.person);
@@ -120,20 +121,6 @@ function EventManager() {
             };
         }
         start();
-        let accumulatedInput = '';
-        const handleKeyDown = async (event) => {
-            if (event.key === 'Enter') {
-                // Handle the accumulated input here
-                console.log("WebsocketId:", webSocketId)
-                await handleScan(accumulatedInput, globalId, globalSocket);
-                accumulatedInput = '';
-            } else {
-                // Append the current key to the accumulated input
-                accumulatedInput += event.key;
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
         const checkEventStatus = setInterval(() => {
             if (isEventExpired(globalEvent)) {
                 alert("You cannot manage an expired event")
@@ -146,19 +133,43 @@ function EventManager() {
             if (socket) {
                 socket.close();
             }
-            window.removeEventListener('keydown', handleKeyDown);
         };
     }, []);
+
+    useEffect(() => {
+        let accumulatedInput = '';
+        const handleKeyDown = async (event) => {
+            if (event.key === 'Enter') {
+                // Handle the accumulated input here
+                console.log("WebsocketId:", webSocketId)
+                await handleScan(accumulatedInput, hostId, socket);
+                accumulatedInput = '';
+            } else {
+                // Append the current key to the accumulated input
+                accumulatedInput += event.key;
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        }
+    },[isQREnabled])
+
+    const toggleBlacklist = () => {
+        setShowBlacklist(!showBlacklist);
+      };
 
     const handleQRToggle = () => {
         setIsQREnabled(!isQREnabled);
     };
 
     const handleScan = async (data, id, socket) => {
+        if (!isQREnabled)
+            return;
         const checkBlackList = (person) => {
             const hostId = id; // Get the selected host ID
-            console.log("Host:", id)
-
             const eventData = {
                 action: 'checkBlackList',
                 host: hostId,
@@ -206,6 +217,25 @@ function EventManager() {
         }
     };
 
+    const onCheckIn = async () => {
+        const eventData = {
+            action: 'onCheckIn',
+            person: personOfInterest,
+            eventId: eventId
+        };
+        setLoading(true)
+        await addToCheckedIn(eventId, personOfInterest);
+        setLoading(false)
+        console.log("Checked in?")
+        socket.send(JSON.stringify(eventData));
+        setWarningOverlay(false)
+        setPersonOfInterest(null)
+    }
+    const onCancel = async () => {
+        setWarningOverlay(false)
+        setPersonOfInterest(null)
+    }
+
     if (websocketOff)
         return <WebSocketError/>
 
@@ -217,10 +247,67 @@ function EventManager() {
         return <ItemNotFound />;
     }
 
+    if(warningOverlay)
+    {
+        return (
+            <div className="overlay">
+              <div className="overlay-content">
+                <h2>Please Consult The Blacklist!</h2>
+                <p>Are you sure you want to check {personOfInterest.firstName} {personOfInterest.lastName} into the event?
+                They may be blacklisted.</p>
+                <button onClick={onCheckIn}>Yes</button>
+                <button onClick={onCancel}>No</button>
+              </div>
+            </div>
+          );
+    };
+
+    if(showBlacklist)
+    {
+        const backButtonStyle = {
+            padding: '10px 20px',
+            background: '#004197',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+          };
+        
+        return (
+            <div className="people-column">
+                            <button style={{backButtonStyle}} onClick={toggleBlacklist}>Back</button>
+                            <h3>Blacklisted People</h3>
+                            <ul style={{listStyleType:'none'}}>
+                                {blacklist.length === 0 ? (
+                                    <p>There are no blacklisted persons.</p>
+                                ) : (
+                                    blacklist.map((person, index) => (
+                                        <li key={index}>
+                                            <div className="person-info">
+                                                <div className="person-name">
+                                                    <p>{person.personData.firstName} {person.personData.lastName}</p>
+                                                    <p>{person.personData.school}</p>
+                                                </div>
+                                                <div className="person-image">
+                                                    <img
+                                                        alt="Image not found"
+                                                        width={"100px"}
+                                                        src={person.personData.image}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </li>
+                                    ))
+                                )}
+                            </ul>
+                        </div>
+        );
+    }
+
     return (
         <div className="event-manager-container">
             <header className="header">
-                <img className="logo" src={logo} alt="Logo" />
+            <button onClick={(e) => navigate(`/`)}><img src={logo} alt="pks logo" className="logo" /></button>
             </header>
             <main className="main-content">
                 <div className="QR-logo-container">
@@ -230,6 +317,7 @@ function EventManager() {
                         src={qr}
                         alt="QR Logo"
                     />
+                    <button onClick={toggleBlacklist}>Show Blacklist</button>
                 </div>
                 <div className="event-info">
                     <h2>{event.name}</h2>

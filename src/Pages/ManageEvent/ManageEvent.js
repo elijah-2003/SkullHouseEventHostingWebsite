@@ -79,7 +79,7 @@ function ManageEvent() {
             return (
                 <div className="manage-event-container">
                     <header className="header">
-                        <img className="logo" src={logo} alt="Event Logo"/>
+                    <button onClick={(e) => navigate(`/`)}><img src={logo} alt="pks logo" className="logo" /></button>
                         <h2 className="event-title">{event.name}</h2>
                     </header>
                     <section className="content">

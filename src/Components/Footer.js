@@ -14,7 +14,7 @@ function Footer() {
         >
           Phi Kappa Sigma International Fraternity
         </a>
-        <p className="address">530 Beacon Street, Boston, MA, 02215</p>
+        <p className="address">530 Beacon Street, Boston, MA 02215</p>
       </div>
     </footer>
   );

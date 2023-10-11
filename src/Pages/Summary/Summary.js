@@ -6,8 +6,6 @@ import {getEvent} from "../../Api/api-service";
 import Loading from "../../Components/Loading";
 import ItemNotFound from "../../Components/ItemNotFound";
 import {addToBlackList, getBlacklist} from "../../Api/api-service";
-import hasEventStarted from "../../Utilities/hasEventStarted";
-import isEventExpired from "../../Utilities/expired";
 
 const Summary = () => {
     const navigate = useNavigate()
@@ -57,12 +55,12 @@ const Summary = () => {
 
     if (loading)
         return <Loading/>
-    if (!loading && !event)
+    if (!event)
         return <ItemNotFound/>
 
     return (
         <div className="event-summary-container">
-            <img src={Logo} alt="Your Logo" className="logo" />
+           <button onClick={(e) => navigate(`/`)}><img src={Logo} alt="pks logo" className="logo" /></button>
             <h1 className="summary-title">Event Summary</h1>
             <div className="checked-in-list">
                 {event.checkedIn.length === 0 ? (
@@ -81,12 +79,6 @@ const Summary = () => {
                                     <div className="person-details">
                                         <p>School: {person.school}</p>
                                         <p>Contact: {person.phone}</p>
-                                        <p>Image: <img
-                                            alt="Image not found"
-                                            width={"250px"}
-                                            src={person.image}
-                                        /></p>
-                                        <button onClick={() => handleAddToBlacklist(person)}>Add to Blacklist</button>
                                         {/* Add more person details as needed */}
                                     </div>
                                 )}

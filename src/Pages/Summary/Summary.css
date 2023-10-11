@@ -1,3 +1,6 @@
+/* Summary.css */
+
+/* Event Summary Container */
 .event-summary-container {
     display: flex;
     flex-direction: column;
@@ -5,47 +8,85 @@
     justify-content: center;
     height: 100vh;
     background-color: #f0f0f0;
-}
-
-.logo {
+    animation: fadeIn 0.5s ease-in-out; /* Add a fade-in animation */
+  }
+  
+  /* Style for the logo */
+  .logo {
     width: 150px;
     height: 150px;
     margin-bottom: 20px;
-}
-
-.summary-title {
+  }
+  
+  /* Summary Title */
+  .summary-title {
     font-size: 24px;
     margin-bottom: 20px;
-}
-
-.checked-in-list {
+    color: #333; /* Text color */
+  }
+  
+  /* Checked-in List Container */
+  .checked-in-list {
     width: 100%;
     max-width: 600px;
     background-color: white;
     border-radius: 5px;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
     padding: 20px;
-}
-
-.person-item {
+    animation: slideIn 0.5s ease-in-out; /* Add a slide-in animation */
+  }
+  
+  /* Person Item */
+  .person-item {
     border-bottom: 1px solid #e0e0e0;
     padding: 10px 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.person-button {
+  }
+  
+  /* Person Button */
+  .person-button {
     background: none;
     border: none;
     cursor: pointer;
     font-weight: bold;
     text-align: left;
-}
-
-.person-details {
+    transition: color 0.3s ease; /* Add a color transition on hover */
+  }
+  
+  .person-button:hover {
+    color: #007bff; /* Change text color on hover */
+  }
+  
+  /* Person Details */
+  .person-details {
     background-color: #f5f5f5;
     padding: 10px;
     margin-top: 10px;
     border-radius: 5px;
-}
+  }
+  
+  /* Keyframes for fadeIn animation */
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Keyframes for slideIn animation */
+  @keyframes slideIn {
+    0% {
+      transform: translateY(-10px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }

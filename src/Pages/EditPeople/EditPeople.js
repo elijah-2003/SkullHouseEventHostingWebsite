@@ -4,14 +4,15 @@ import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import './EditPeople.css';
 import logo from '../../Images/Phi_Kappa_Sigma_coat_of_arms.png';
-import Footer from "../../Components/Footer";
 import {addToBlackList, addToInvited, getEvent, deleteFromInvited, deleteFromBlackList, getBlacklist} from "../../Api/api-service";
 import Loading from "../../Components/Loading";
 import ItemNotFound from "../../Components/ItemNotFound";
 import qrcode from "qrcode";
-import { PDFViewer, Page, Text, View, Document, Image, Font } from "@react-pdf/renderer";
+import { PDFViewer, Page, Text, View, Document, Image as PdfImage, Font } from "@react-pdf/renderer";
 import isEventExpired from "../../Utilities/expired";
 import hasEventStarted from "../../Utilities/hasEventStarted";
+import imageCompression from 'browser-image-compression';
+
 
 function EditPeople() {
     const navigate = useNavigate();
@@ -28,6 +29,7 @@ function EditPeople() {
     const [lastName, setLastName] = useState("")
     const [school, setSchool] = useState("")
     const [contact, setContact] = useState("")
+    const [numGuests, setNumGuests] = useState(0)
     const [selectedFile, setSelectedFile] = useState(null)
 
     useEffect(() => {
@@ -108,7 +110,7 @@ function EditPeople() {
             paddingRight: 20,
         },
         exitButton: {
-            color: "gold",
+            color: "#0056b3",
             fontSize: 16,
             fontWeight: "bold",
             cursor: "pointer",
@@ -118,7 +120,7 @@ function EditPeople() {
             height: window.innerHeight,
         },
     };
-    const createPerson = (first, last, school, phone, image, invited) =>
+    const createPerson = (first, last, school, phone, image, invited, guests) =>
     {
         return {
             firstName: first,
@@ -126,19 +128,58 @@ function EditPeople() {
             school: school,
             phone: phone,
             image:image,
+            guests: guests,
             id: uuidv4(),
             eventId: eventId,
             invited: invited,
         }
     }
 
-    function convertImageToBase64(imageFile, callback) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            const base64String = event.target.result;
-            callback(base64String);
-        };
-        reader.readAsDataURL(imageFile);
+    const compress = async (event) => {
+        const imageFile = event.target.files[0];
+        console.log('originalFile instanceof Blob', imageFile instanceof Blob); // true
+        console.log(`originalFile size ${imageFile.size / 1024 / 1024} MB`);
+      
+        const options = {
+          maxSizeMB: 0.3,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+        }
+        try {
+          const compressedFile = await imageCompression(imageFile, options);
+          console.log('compressedFile instanceof Blob', compressedFile instanceof Blob); // true
+          console.log(`compressedFile size ${compressedFile.size / 1024 / 1024} MB`); // smaller than maxSizeMB
+      
+          return compressedFile
+        } catch (error) {
+          console.log(error);
+        }
+      
+    };
+
+    function convertImageToBase64(imageFilePromise, callback) {
+        imageFilePromise
+        .then((imageFile) => {
+            const reader = new FileReader();
+
+            reader.readAsDataURL(imageFile);
+
+            reader.onload = (event) => {
+                const base64String = event.target.result;
+                callback(base64String);
+            };
+
+            reader.onerror = (event) => {
+                console.error("Error reading the file:", event.target.error);
+                // Handle the error here, e.g., by calling the callback with an error message.
+                callback(null, event.target.error);
+            };
+        })
+        .catch((error) => {
+            console.error(error);
+            // Handle the error here, e.g., by calling the callback with an error message.
+            callback(null, error);
+        });
     }
 
 // Inside the EditPeople component
@@ -159,15 +200,14 @@ function EditPeople() {
         event.preventDefault();
         if (addToBlackListView)
         {
-            const person = createPerson(firstName, lastName, school, contact, selectedFile, false)
-            console.log("person:", person)
+            const person = createPerson(firstName, lastName, school, contact, selectedFile, false, numGuests)
             setLoading(true)
             await addToBlackList(eventId, person)
             window.location.href = window.location.href;
         }
         else
         {
-            const person = createPerson(firstName, lastName, school, contact, selectedFile, true)
+            const person = createPerson(firstName, lastName, school, contact, selectedFile, true, numGuests)
             setLoading(true)
             await addToInvited(eventId, person)
             window.location.href = window.location.href;
@@ -198,14 +238,14 @@ function EditPeople() {
                 <>
                     <div style={styles.navBar}>
                     <span style={styles.exitButton} onClick={onClose}>
-                    X
+                    Close (Don't Use Navigation Arrows!)
                     </span>
                     </div>
                     <PDFViewer style={styles.viewer}>
                         <Document>
                             <Page style={styles.page}>
                                 <View style={styles.header}>
-                                    <Image style={styles.logo} src={logo} />
+                                    <PdfImage style={styles.logo} src={logo} />
                                     <Text style={styles.eventName}>{event.name}</Text>
                                 </View>
                                 <View style={styles.eventInfo}>
@@ -215,10 +255,13 @@ function EditPeople() {
                                 </View>
                                 <View>
                                     <Text style={styles.personName}>
+                                        Number of Guests: {person.guests}
+                                    </Text>
+                                    <Text style={styles.personName}>
                                         {person.firstName} {person.lastName}
                                     </Text>
                                     <Text style={styles.schoolName}>{person.school}</Text>
-                                    <Image style={styles.qrCode} src={generateQRCodeDataURL(person)} />
+                                    <PdfImage style={styles.qrCode} src={generateQRCodeDataURL(person)} />
                                 </View>
                             </Page>
                         </Document>
@@ -236,30 +279,31 @@ function EditPeople() {
                             <label>
                                 First Name:
                                 <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)}
-                                required={true}/>
+                                required={!addToBlackListView}/>
                             </label>
                             <label>
                                 Last Name:
                                 <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)}
-                                required={true}/>
+                                required={!addToBlackListView}/>
                             </label>
                             <label>
                                 School:
-                                <input type="text" value={school} onChange={(e) => setSchool(e.target.value)} />
+                                <input type="text" value={school} onChange={(e) => setSchool(e.target.value)} 
+                                required={!addToBlackListView}/>
                             </label>
-                            <label>
-                                Contact:
-                                <input type="text" value={contact} onChange={(e) => setContact(e.target.value)} />
-                            </label>
-                            <label>
+                            {!addToBlackListView && (<label>
+                                Number of Guests:
+                                <input type="number" value={numGuests} onChange={(e) => setNumGuests(e.target.value)} 
+                                required={!addToBlackListView}/>
+                            </label>)}
+                            {addToBlackListView && (<label>
                                 Upload Image{addToBlackListView ? ' (required)' : ''}:
-                                <input type="file" accept="image/*" onChange={(e) => convertImageToBase64(e.target.files[0], (base64String) => {
+                                <input type="file" accept="image/*" onChange={(e) => convertImageToBase64(compress(e), (base64String) => {
                                     console.log('Base64 encoded image:', base64String);
                                     setSelectedFile(base64String)
-                                    // You can use the base64String as needed, such as including it in your JSON object
                                 })}
                                 required={addToBlackListView}/>
-                            </label>
+                            </label>)}
                             <button type="submit">{addToBlackListView ? "Blacklist" : "Invite"}</button>
                             <button type="button" onClick={onClose}>Cancel</button>
                         </form>
@@ -271,16 +315,16 @@ function EditPeople() {
             return (
                 <div className="edit-people-container">
                     <header className="header">
-                        <img className="logo" src={logo} alt="Logo"/>
+                    <button onClick={(e) => navigate(`/`)}><img src={logo} alt="pks logo" className="logo" /></button>
                         <h2>Edit People</h2>
                     </header>
                     <form className="edit-people-form">
                         {/* ... (dropdowns and textboxes) */}
                         <div className="actions">
-                            <button type="button" onClick={() => setAddToInvitedListView(true)}>
+                            <button type="button" id="add-to-invited" onClick={() => setAddToInvitedListView(true)}>
                                 {selectedAction === 'invite' ? 'Invite' : 'Add to Invited'}
                             </button>
-                            <button type="button" onClick={() => setAddToBlackListView(true)}>
+                            <button type="button" id="add-to-blacklist" onClick={() => setAddToBlackListView(true)}>
                                 {selectedAction === 'blacklist' ? 'Blacklist' : 'Add to Blacklist'}
                             </button>
                         </div>
@@ -288,7 +332,7 @@ function EditPeople() {
                     <div className="people-lists">
                         <div className="people-column">
                             <h3>Invited People</h3>
-                            <ul>
+                            <ul style={{listStyleType:'none'}}>
                                 {event.invited.length === 0 ? (
                                     <p>There are currently no invitations.</p>
                                 ) : (
@@ -299,17 +343,10 @@ function EditPeople() {
                                                     <p>{person.firstName} {person.lastName}</p>
                                                     <p>{person.school}</p>
                                                 </div>
-                                                <div className="person-image">
-                                                    <img
-                                                        alt="Image not found"
-                                                        width={"100px"}
-                                                        src={person.image}
-                                                    />
-                                                </div>
                                             </div>
                                             <div className="person-actions">
-                                                <button onClick={() => handleDeleteInvited(index)}>Delete</button>
-                                                <button onClick={() => QRCodePDF(person)}>Generate Invite</button>
+                                                <button id="delete-button" onClick={() => handleDeleteInvited(index)}>Delete</button>
+                                                <button id="generate-invite" onClick={() => QRCodePDF(person)}>Generate Invite</button>
                                             </div>
                                         </li>
                                     ))
@@ -318,9 +355,9 @@ function EditPeople() {
                         </div>
                         <div className="people-column">
                             <h3>Blacklisted People</h3>
-                            <ul>
+                            <ul style={{listStyleType:'none'}}>
                                 {blacklist.length === 0 ? (
-                                    <p>There are no blacklisted persons.</p>
+                                    <p>There are no blacklisted people.</p>
                                 ) : (
                                     blacklist.map((person, index) => (
                                         <li key={index}>
@@ -338,7 +375,7 @@ function EditPeople() {
                                                 </div>
                                             </div>
                                             <div className="person-actions">
-                                                <button onClick={() => handleDeleteBlackList(index)}>Delete</button>
+                                                <button id="delete-button" onClick={() => handleDeleteBlackList(index)}>Delete</button>
                                             </div>
                                         </li>
                                     ))

@@ -1,37 +1,85 @@
 /* AddEvent.css */
+
+/* Add Event Form */
 .add-event-form {
     display: grid;
     gap: 1rem;
-}
-
-.add-event-form label {
+    animation: fadeIn 0.5s ease-in-out; /* Add a fade-in animation */
+  }
+  
+  /* Form Labels */
+  .add-event-form label {
     font-weight: bold;
     display: block;
-}
-
-.add-event-form input,
-.add-event-form textarea {
+  }
+  
+  /* Form Inputs and Textareas */
+  .add-event-form input,
+  .add-event-form textarea {
     width: 90%;
     padding: 0.5rem;
     border: 1px solid #ccc;
     border-radius: 5px;
-}
-
-.add-event-form button {
+  }
+  
+  /* Submit Button */
+  .add-event-form button {
     background-color: #DAA520;
     color: white;
     border: none;
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
-}
-.form-group textarea {
-    resize: vertical; /* Allow vertical resizing */
-    min-height: 100px; /* Set a minimum height */
-}
-body {
+    animation: pulse 1.5s infinite; /* Add a pulsating animation */
+  }
+  
+  /* Textarea Styles */
+  .form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+  
+  /* Body Styles */
+  body {
     font-family: sans-serif;
-}
-h2{
+  }
+  
+  /* Header Styles */
+  h2 {
     text-decoration-line: underline;
-}
+    animation: slideIn 0.5s ease-in-out; /* Add a slide-in animation */
+  }
+  
+  /* Keyframes for fadeIn animation */
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Keyframes for pulse animation */
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+  }
+  
+  /* Keyframes for slideIn animation */
+  @keyframes slideIn {
+    0% {
+      transform: translateY(-10px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }

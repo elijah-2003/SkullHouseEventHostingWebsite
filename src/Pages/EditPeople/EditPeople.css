@@ -1,154 +1,212 @@
-/* Style for the edit-people-container */
+/* EditPeople.css */
+
+/* Edit People Container */
 .edit-people-container {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
-}
+    animation: fadeIn 0.5s ease-in-out; /* Add a fade-in animation */
+  }
 
-/* Header styles */
-.header {
+  .edit-people-container button {
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s;
+  }
+  
+  /* Header Styles */
+  .header {
     display: flex;
     align-items: center;
     margin-bottom: 20px;
-}
-
-.logo {
+  }
+  
+  .logo {
     width: 50px;
     height: 50px;
     margin-right: 10px;
-}
-
-h2 {
+  }
+  
+  h2 {
     font-size: 24px;
     margin: 0;
-}
-
-/* Form styles */
-.edit-people-form {
+  }
+  
+  /* Edit People Form */
+  .edit-people-form {
     margin-bottom: 20px;
-}
-
-.actions {
+    animation: slideIn 0.5s ease-in-out; /* Add a slide-in animation */
+  }
+  
+  /* Actions Buttons */
+  .actions {
     display: flex;
     gap: 10px;
-}
-
-/* People lists layout */
-.people-lists {
+    animation: fadeIn 0.5s ease-in-out; /* Add a fade-in animation */
+  }
+  
+  /* People Lists Layout */
+  .people-lists {
     display: flex;
     gap: 20px;
-}
-
-.people-column {
+  }
+  
+  .people-column {
     flex: 1;
-}
-
-/* Person item styles */
-.person-info {
+  }
+  
+  /* Person Item Styles */
+  .person-info {
     display: flex;
     align-items: center;
     margin-bottom: 10px;
-}
-
-.person-name {
+    animation: slideIn 0.5s ease-in-out; /* Add a slide-in animation */
+  }
+  
+  .person-name {
     flex: 1;
-}
-
-.person-image img {
+  }
+  
+  .person-image img {
     width: 100px;
     height: auto;
     border-radius: 50%;
     margin-left: 20px;
-}
-
-.person-actions button {
+  }
+  
+  .person-actions button {
     margin-right: 10px;
-}
-
-/* Footer styles */
-/* Add styles for the Footer component if needed */
-
-/* Center items in the middle of the page when loading */
-.Loading {
+    animation: fadeIn 0.5s ease-in-out; /* Add a fade-in animation */
+  }
+  
+  /* Loading Styles */
+  .Loading {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-}
-
-/* Style for the "No items found" message */
-.ItemNotFound {
+  }
+  
+  /* No Items Found Message Styles */
+  .ItemNotFound {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     font-size: 20px;
-}
+  }
+  
+  /* Keyframes for fadeIn animation */
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Keyframes for slideIn animation */
+  @keyframes slideIn {
+    0% {
+      transform: translateY(-10px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
 
+  /* Styles for the modal overlay */
 .modal-overlay {
-    /* Styles to cover the whole screen with a semi-transparent background */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
+/* Styles for the modal */
 .modal {
-    /* Styles for the modal box */
-    background-color: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  background: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  width: 100%;
 }
 
-.modal-title {
-    font-size: 20px;
-    margin-bottom: 10px;
+/* Styles for the headings */
+.modal h2 {
+  color: #0056b3;
+  font-size: 24px;
+  margin-bottom: 20px;
 }
 
-.modal-form {
-    display: grid;
-    gap: 10px;
+/* Styles for the form labels and inputs */
+.modal label {
+  display: block;
+  margin-bottom: 10px;
+  color: #333;
 }
 
-.modal-label {
-    display: block;
-    font-size: 14px;
+.modal input[type="text"],
+.modal input[type="file"] {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
 }
 
-.modal-input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+/* Style the submit buttons */
+.modal button[type="submit"] {
+  background: #0056b3;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 18px;
+  cursor: pointer;
+  margin-right: 10px;
 }
 
-.modal-buttons {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 15px;
+/* Style the cancel button */
+.modal button[type="button"] {
+  background: #ccc;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 18px;
+  cursor: pointer;
 }
 
-.modal-submit,
-.modal-cancel {
-    padding: 8px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+/* Center the buttons */
+.modal form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-.modal-submit {
-    background-color: #007bff;
-    color: white;
-    margin-right: 10px;
+/* Optional: Add spacing between inputs and buttons */
+.modal input[type="text"],
+.modal input[type="file"],
+.modal button {
+  margin-right: 10px;
+  margin-bottom: 10px;
 }
 
-.modal-cancel {
-    background-color: #ccc;
-    color: #333;
+/* Optional: Style the required field text */
+.modal label.required::after {
+  content: "*";
+  color: red;
 }
